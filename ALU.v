@@ -34,11 +34,15 @@ module ALU(
     
     reg [1:0] counter;
     reg dig2;
+    reg cout;
     wire new_clk;
     
     wire [6:0] op_codes;
     wire [6:0] result_codes;
     wire[6:0] tens_codes;
+    reg [7:0] A_bus;
+    reg [7:0] B_bus;
+    reg [8:0] result_bus;
     
     decoder DUT(.number(op),.cathode(op_codes));
     new_decoder DDD(.number(result),.cathode(result_codes));
@@ -51,6 +55,8 @@ module ALU(
     end
     always @(*) begin
         dig2 = result / 4'b1010;
+        A_bus = {0,0,0,0,A[3],A[2],A[1],A[0]};
+        B_bus = {0,0,0,0,B[3],B[2],B[1],B[0]};
     end
 
     always @ (posedge new_clk) begin
@@ -74,8 +80,6 @@ module ALU(
     end
     
     always @ (*) begin
-        //anode <= 8'b01111111;
-        //display <= op_codes;
         overflow <= 0;
         if (rst) begin
             result <= 0;
@@ -93,15 +97,17 @@ module ALU(
             end
             4'b0010: begin 
                 result <= A - B;
-                overflow <= (A[3] & ~B[3] & ~result[3]) | (~A[3] & B[3] & result[3]);
+                overflow <= (~A[3] & B[3] & ~result[3]) | (A[3] & ~B[3] & result[3]);
             end
             4'b0011: begin 
                 result <= A + B;
-                overflow <= (A[3] & B[3] & ~result[3]) | (~A[3] & ~B[3] & result[3]);
+                result_bus <= A_bus + B_bus;
+                overflow <= result_bus[4];
             end
             4'b0100: begin 
                 result <= A * B;
-                overflow <= (A > 4'b1110 || B > 4'b1110) ? 1 : 0;
+                result_bus <= A_bus * B_bus;
+                overflow <= !(result_bus[8:4] == 00000);
             end
             4'b0101: result <= A >> 1;
             4'b0110: result <= A << 1;
