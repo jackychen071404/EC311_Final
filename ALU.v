@@ -33,18 +33,27 @@ module ALU(
     reg [3:0] result;
     
     reg [1:0] counter;
+    reg dig2;
+    wire new_clk;
     
     wire [6:0] op_codes;
     wire [6:0] result_codes;
+    wire[6:0] tens_codes;
     
     decoder DUT(.number(op),.cathode(op_codes));
     new_decoder DDD(.number(result),.cathode(result_codes));
+    tens_decoder DDT(.number(dig2),.cathode(tens_codes));
+    Clock_divider(.in_clk(clock), .out_clk(new_clk));
     
     //always #5 clock = ~clock;
     initial begin
         counter <= 0;
     end
-    always @ (posedge clock) begin
+    always @(*) begin
+        dig2 = result / 4'b1010;
+    end
+
+    always @ (posedge new_clk) begin
          case (counter)
             0: begin
                 display <= op_codes;
@@ -52,7 +61,7 @@ module ALU(
                 counter <= 1;
             end
             1: begin
-                display <= result_codes;
+                display <= tens_codes;
                 anode <= 8'b11111101;
                 counter <= 2;
             end
@@ -76,11 +85,11 @@ module ALU(
             case (op)
             4'b0000: begin 
                 result <= A + 1;
-                overflow <= (A[3] & B[3]) | (A[3] & ~result[3]) | (~B[3] & ~result[3]);
+                overflow <= A > 14;
             end
             4'b0001: begin 
                 result <= B + 1;
-                overflow <= (A[3] & B[3]) | (~A[3] & result[3]) | (B[3] & ~result[3]);
+                overflow <= B > 14;
             end
             4'b0010: begin 
                 result <= A - B;
