@@ -42,12 +42,12 @@ module decoder(
             7:cathode<=7'b0001111;
             8:cathode<=7'b0000000;
             9: cathode<=7'b0000100;
-            10:cathode<=7'b0001000;
-            11:cathode<=7'b1100000;
-            12:cathode<=7'b0110001;
-            13:cathode<=7'b1000010;
-            14:cathode<=7'b0110000;
-            15:cathode<=7'b0111000;
+            10:cathode<=7'b0000001;
+            11:cathode<=7'b1001111;
+            12:cathode<=7'b0010010;
+            13:cathode<=7'b0000110;
+            14:cathode<=7'b1001100;
+            15:cathode<=7'b0100100;
             default: cathode<=7'b1111111;
         endcase
     end
